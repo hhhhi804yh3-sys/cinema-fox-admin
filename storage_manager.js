@@ -10,6 +10,7 @@ const BRANCH = 'main';
 // In-Memory Fast Caches
 let cachedCatalog = null;
 let cachedRequests = null;
+let cachedIncomingScrapes = null;
 let cachedAnalytics = {
   devices: {},
   totalSessions: 0,
@@ -83,105 +84,167 @@ function saveGithubFile(filePath, jsonContent, message) {
   });
 }
 
-// ---------------------------------------------------------------
-// CATALOG PERSISTENCE
-// ---------------------------------------------------------------
+// -------------------------------------------------------------
+// CATALOG DATA MANAGEMENT
+// -------------------------------------------------------------
 async function loadCatalog() {
   if (cachedCatalog !== null) return cachedCatalog;
 
-  // 1. Try reading from GitHub Repository
-  const ghFile = await getGithubFile('data/published_catalog.json');
-  if (ghFile && Array.isArray(ghFile.content) && ghFile.content.length > 0) {
-    cachedCatalog = ghFile.content;
+  // 1. Try GitHub cloud storage
+  const remote = await getGithubFile('data/published_catalog.json');
+  if (remote && Array.isArray(remote.content)) {
+    cachedCatalog = remote.content;
     return cachedCatalog;
   }
 
-  // 2. Fallback to local extracted_subjects.json
-  try {
-    const localPath = path.join(__dirname, 'extracted_subjects.json');
-    if (fs.existsSync(localPath)) {
-      const localData = JSON.parse(fs.readFileSync(localPath, 'utf8'));
-      cachedCatalog = localData.slice(0, 30).map((item, idx) => ({
-        ...item,
-        id: item.subjectId || `work_${idx + 1}`,
-        titleAr: item.titleAr || item.title,
-        hidden: false,
-        featured: idx < 4,
-        publishedAt: new Date(Date.now() - (idx * 3600000)).toISOString()
-      }));
-      // Asynchronously seed GitHub
-      saveGithubFile('data/published_catalog.json', cachedCatalog, 'seed: initial catalog from local extracted subjects');
+  // 2. Fallback to local file
+  const localPath = path.join(__dirname, 'data', 'published_catalog.json');
+  if (fs.existsSync(localPath)) {
+    try {
+      cachedCatalog = JSON.parse(fs.readFileSync(localPath, 'utf8'));
       return cachedCatalog;
-    }
-  } catch(e){}
+    } catch(e) {}
+  }
+
+  // 3. Fallback to cinemana catalog if available
+  const cinemanaPath = path.join(__dirname, 'cinemana_catalog.json');
+  if (fs.existsSync(cinemanaPath)) {
+    try {
+      cachedCatalog = JSON.parse(fs.readFileSync(cinemanaPath, 'utf8'));
+      return cachedCatalog;
+    } catch(e) {}
+  }
 
   cachedCatalog = [];
   return cachedCatalog;
 }
 
-async function persistCatalog(newCatalog) {
-  cachedCatalog = newCatalog;
-  // Non-blocking save to GitHub
-  saveGithubFile('data/published_catalog.json', newCatalog, `sync: catalog updated (${newCatalog.length} works)`).catch(() => {});
+async function persistCatalog(catalog) {
+  cachedCatalog = catalog;
+
+  // 1. Write local disk cache
+  try {
+    const localDir = path.join(__dirname, 'data');
+    if (!fs.existsSync(localDir)) fs.mkdirSync(localDir, { recursive: true });
+    fs.writeFileSync(path.join(localDir, 'published_catalog.json'), JSON.stringify(catalog, null, 2), 'utf8');
+  } catch(e) {}
+
+  // 2. Persist to GitHub repository
+  await saveGithubFile('data/published_catalog.json', catalog, `sync: update catalog (${catalog.length} items)`);
+  return true;
 }
 
-// ---------------------------------------------------------------
-// VIEWER REQUESTS PERSISTENCE
-// ---------------------------------------------------------------
+// -------------------------------------------------------------
+// INCOMING MOVIEBOX DESKTOP SCRAPES MANAGEMENT
+// -------------------------------------------------------------
+async function loadIncomingScrapes() {
+  if (cachedIncomingScrapes !== null) return cachedIncomingScrapes;
+
+  // 1. Try GitHub cloud storage
+  const remote = await getGithubFile('data/incoming_scrapes.json');
+  if (remote && Array.isArray(remote.content)) {
+    cachedIncomingScrapes = remote.content;
+    return cachedIncomingScrapes;
+  }
+
+  // 2. Fallback to local file
+  const localPath = path.join(__dirname, 'data', 'incoming_scrapes.json');
+  if (fs.existsSync(localPath)) {
+    try {
+      cachedIncomingScrapes = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+      return cachedIncomingScrapes;
+    } catch(e) {}
+  }
+
+  cachedIncomingScrapes = [];
+  return cachedIncomingScrapes;
+}
+
+async function persistIncomingScrapes(scrapes) {
+  cachedIncomingScrapes = scrapes;
+
+  try {
+    const localDir = path.join(__dirname, 'data');
+    if (!fs.existsSync(localDir)) fs.mkdirSync(localDir, { recursive: true });
+    fs.writeFileSync(path.join(localDir, 'incoming_scrapes.json'), JSON.stringify(scrapes, null, 2), 'utf8');
+  } catch(e) {}
+
+  await saveGithubFile('data/incoming_scrapes.json', scrapes, `sync: update incoming desktop scrapes (${scrapes.length} items)`);
+  return true;
+}
+
+// -------------------------------------------------------------
+// VIEWER REQUESTS MANAGEMENT
+// -------------------------------------------------------------
 async function loadRequests() {
   if (cachedRequests !== null) return cachedRequests;
 
-  const ghFile = await getGithubFile('data/viewer_requests.json');
-  if (ghFile && Array.isArray(ghFile.content)) {
-    cachedRequests = ghFile.content;
+  const remote = await getGithubFile('data/viewer_requests.json');
+  if (remote && Array.isArray(remote.content)) {
+    cachedRequests = remote.content;
     return cachedRequests;
   }
 
-  // Initial Seed
-  cachedRequests = [
-    { id: "req_1", title: "Game of Thrones", type: "مسلسل", year: "2019", notes: "يرجى توفير جميع المواسم بدقة 1080p مع الترجمة العربية", date: "منذ 15 دقيقة", status: "pending" },
-    { id: "req_2", title: "Inception", type: "فيلم", year: "2010", notes: "مترجم عربي عالي الجودة Full HD", date: "منذ ساعة", status: "pending" },
-    { id: "req_3", title: "قيامة عثمان", type: "مسلسل", year: "2024", notes: "الحلقة 165 مترجمة حصرياً", date: "منذ ساعتين", status: "pending" }
-  ];
-  saveGithubFile('data/viewer_requests.json', cachedRequests, 'seed: initial viewer requests');
+  const localPath = path.join(__dirname, 'data', 'viewer_requests.json');
+  if (fs.existsSync(localPath)) {
+    try {
+      cachedRequests = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+      return cachedRequests;
+    } catch(e) {}
+  }
+
+  cachedRequests = [];
   return cachedRequests;
 }
 
-async function persistRequests(newRequests) {
-  cachedRequests = newRequests;
-  saveGithubFile('data/viewer_requests.json', newRequests, `sync: viewer requests updated (${newRequests.length} requests)`).catch(() => {});
+async function persistRequests(requests) {
+  cachedRequests = requests;
+
+  try {
+    const localDir = path.join(__dirname, 'data');
+    if (!fs.existsSync(localDir)) fs.mkdirSync(localDir, { recursive: true });
+    fs.writeFileSync(path.join(localDir, 'viewer_requests.json'), JSON.stringify(requests, null, 2), 'utf8');
+  } catch(e) {}
+
+  await saveGithubFile('data/viewer_requests.json', requests, `sync: update requests (${requests.length} items)`);
+  return true;
 }
 
-// ---------------------------------------------------------------
-// ANALYTICS & ACTIVE USERS PERSISTENCE
-// ---------------------------------------------------------------
+// -------------------------------------------------------------
+// LIVE ANALYTICS & ACTIVE USERS MANAGEMENT
+// -------------------------------------------------------------
 async function loadAnalytics() {
-  const ghFile = await getGithubFile('data/analytics.json');
-  if (ghFile && ghFile.content && typeof ghFile.content === 'object') {
-    cachedAnalytics = {
-      ...cachedAnalytics,
-      ...ghFile.content,
-      devices: { ...cachedAnalytics.devices, ...(ghFile.content.devices || {}) }
-    };
+  const remote = await getGithubFile('data/analytics.json');
+  if (remote && remote.content && remote.content.devices) {
+    cachedAnalytics = remote.content;
+  } else {
+    const localPath = path.join(__dirname, 'data', 'analytics.json');
+    if (fs.existsSync(localPath)) {
+      try {
+        cachedAnalytics = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+      } catch(e) {}
+    }
   }
   return cachedAnalytics;
 }
 
-function recordDevicePing(deviceInfo) {
-  const deviceId = deviceInfo.deviceId || 'unknown_device';
+function recordDevicePing(info) {
   const now = Date.now();
+  const id = info.deviceId || 'unknown_device';
 
-  cachedAnalytics.devices[deviceId] = {
-    deviceId: deviceId,
-    model: deviceInfo.model || 'Android Device',
-    platform: deviceInfo.platform || 'Android',
-    appVersion: deviceInfo.appVersion || '1.0.0',
+  if (!cachedAnalytics.devices[id]) {
+    cachedAnalytics.totalSessions = (cachedAnalytics.totalSessions || 0) + 1;
+  }
+
+  cachedAnalytics.devices[id] = {
+    id,
+    deviceModel: info.deviceModel || 'Mobile Device',
+    appVersion: info.appVersion || '3.0.0',
+    ip: info.ip || '127.0.0.1',
     lastActive: now,
-    firstSeen: cachedAnalytics.devices[deviceId]?.firstSeen || now,
-    sessionCount: (cachedAnalytics.devices[deviceId]?.sessionCount || 0) + 1
+    firstSeen: cachedAnalytics.devices[id]?.firstSeen || now,
+    pingCount: (cachedAnalytics.devices[id]?.pingCount || 0) + 1
   };
-
-  cachedAnalytics.totalSessions++;
   cachedAnalytics.lastUpdated = now;
 
   // Persist periodically (throttled every 60 seconds)
@@ -196,7 +259,7 @@ function getLiveAnalyticsSummary() {
   const fifteenMinsAgo = now - (15 * 60 * 1000);
   const oneDayAgo = now - (24 * 60 * 60 * 1000);
 
-  const deviceList = Object.values(cachedAnalytics.devices);
+  const deviceList = Object.values(cachedAnalytics.devices || {});
   const activeNow = deviceList.filter(d => d.lastActive > fifteenMinsAgo).length;
   const activeToday = deviceList.filter(d => d.lastActive > oneDayAgo).length;
 
@@ -204,7 +267,7 @@ function getLiveAnalyticsSummary() {
     activeNow: Math.max(activeNow, 1), // At least current active session
     activeToday: Math.max(activeToday, 1),
     totalDevices: Math.max(deviceList.length, 1),
-    totalSessions: cachedAnalytics.totalSessions,
+    totalSessions: cachedAnalytics.totalSessions || 1,
     recentDevices: deviceList.sort((a, b) => b.lastActive - a.lastActive).slice(0, 10)
   };
 }
@@ -212,6 +275,8 @@ function getLiveAnalyticsSummary() {
 module.exports = {
   loadCatalog,
   persistCatalog,
+  loadIncomingScrapes,
+  persistIncomingScrapes,
   loadRequests,
   persistRequests,
   loadAnalytics,

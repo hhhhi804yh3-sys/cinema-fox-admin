@@ -27,7 +27,7 @@ function generateToken(user) {
 
 function verifyToken(token) {
   if (!token) return false;
-  if (token === ADMIN_PASSWORD) return true;
+  if (token === ADMIN_PASSWORD) return true; // Direct master password bypass
   try {
     const parts = token.split('.');
     if (parts.length !== 2) return false;
@@ -35,21 +35,36 @@ function verifyToken(token) {
     const expected = crypto.createHmac('sha256', JWT_SECRET).update(b64).digest('base64url');
     if (sig !== expected) return false;
     const payload = JSON.parse(Buffer.from(b64, 'base64url').toString('utf8'));
-    return Date.now() < payload.exp;
-  } catch(e) {
+    if (payload.exp && Date.now() > payload.exp) return false;
+    return true;
+  } catch (e) {
     return false;
   }
 }
 
 // -------------------------------------------------------------
-// 2. HTTP SERVER HANDLER
+// 2. MIME TYPE RESOLVER
+// -------------------------------------------------------------
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon'
+};
+
+// -------------------------------------------------------------
+// 3. HTTP REQUEST ROUTER
 // -------------------------------------------------------------
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
-  const pathname = parsedUrl.pathname;
+  let pathname = parsedUrl.pathname;
   const method = req.method;
 
-  // CORS headers
+  // Universal CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
@@ -68,168 +83,130 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // -------------------------------------------------------------
-  // PUBLIC ENDPOINTS (Flutter App & Viewers)
-  // -------------------------------------------------------------
-
-  // Health Check
-  if (pathname === '/api/health' && method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({
-      status: 'ok',
-      service: 'Cinema Fox Cloud API',
-      version: '3.0.0-production',
-      timestamp: new Date().toISOString()
-    }));
+  const filePath = path.join(PUBLIC_DIR, pathname);
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    const ext = path.extname(filePath).toLowerCase();
+    res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+    return res.end(fs.readFileSync(filePath));
   }
 
-  // Mobile App Active Ping (Analytics)
-  if (pathname === '/api/analytics/ping' && method === 'POST') {
-    let body = '';
-    req.on('data', c => body += c);
-    req.on('end', () => {
-      try {
-        const deviceInfo = JSON.parse(body);
-        storage.recordDevicePing(deviceInfo);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ success: true, timestamp: Date.now() }));
-      } catch(e) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: e.message }));
-      }
-    });
-    return;
-  }
+  // ===========================================================
+  // PUBLIC API ENDPOINTS (For Flutter App & Anonymous Viewers)
+  // ===========================================================
 
-  // Public Catalog: GET /api/catalog
+  // 1. Mobile App Live Catalog: GET /api/catalog
   if (pathname === '/api/catalog' && method === 'GET') {
     const catalog = await storage.loadCatalog();
-    const typeFilter = parsedUrl.query.type;
-    const searchFilter = (parsedUrl.query.q || '').toLowerCase();
-
-    let items = catalog.filter(i => !i.hidden);
-
-    if (typeFilter) {
-      items = items.filter(i => (i.type || '').toLowerCase() === typeFilter.toLowerCase());
-    }
-
-    if (searchFilter) {
-      items = items.filter(i => 
-        (i.title || '').toLowerCase().includes(searchFilter) ||
-        (i.titleAr || '').toLowerCase().includes(searchFilter)
-      );
-    }
-
+    const visible = catalog.filter(c => !c.hidden);
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({
-      success: true,
-      count: items.length,
-      catalog: items
-    }));
+    return res.end(JSON.stringify(visible));
   }
 
-  // Public Single Item: GET /api/catalog/:id
-  if (pathname.startsWith('/api/catalog/') && method === 'GET' && !pathname.includes('/toggle')) {
-    const id = pathname.replace('/api/catalog/', '');
-    const catalog = await storage.loadCatalog();
-    const found = catalog.find(c => c.id === id || c.subjectId === id);
-    if (found) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ success: true, item: found }));
-    } else {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ success: false, error: 'العمل غير موجود' }));
-    }
-  }
-
-  // Public Viewer Request: POST /api/requests (From Flutter "طلب عمل")
+  // 2. Viewer Request Submission: POST /api/requests
   if (pathname === '/api/requests' && method === 'POST') {
     let body = '';
     req.on('data', c => body += c);
     req.on('end', async () => {
       try {
         const data = JSON.parse(body);
-        const title = (data.title || '').trim();
-        if (!title) {
+        if (!data.title) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ success: false, error: 'عنوان العمل مطلوب' }));
+          return res.end(JSON.stringify({ error: 'العنوان مطلوب' }));
         }
 
         const requests = await storage.loadRequests();
         const newReq = {
-          id: `req_${Date.now()}`,
-          title: title,
-          type: data.type || 'فيلم',
-          year: data.year || '2026',
+          id: Date.now().toString(),
+          title: data.title,
+          type: data.type || 'movie',
+          deviceModel: data.deviceModel || 'Unknown Device',
           notes: data.notes || '',
-          date: 'الآن',
-          status: 'pending',
-          submittedAt: new Date().toISOString()
+          date: new Date().toISOString(),
+          status: 'pending'
         };
 
         requests.unshift(newReq);
         await storage.persistRequests(requests);
 
-        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({
           success: true,
-          message: 'تم استلام طلبك بنجاح! سيتم مراجعته وتوفيره قريباً.',
+          message: 'تم إرسال طلبك بنجاح وسيقوم المشرف بفحصه وإضافته قريباً',
           request: newReq
         }));
-      } catch(e) {
+      } catch (e) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: e.message }));
+        return res.end(JSON.stringify({ error: 'صيغة غير صالحة' }));
       }
     });
     return;
   }
 
-  // Admin Login: POST /api/login
+  // 3. Device Analytics Heartbeat: POST /api/analytics/ping
+  if (pathname === '/api/analytics/ping' && method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', async () => {
+      try {
+        const info = JSON.parse(body);
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+        storage.recordDevicePing({ ...info, ip: ip.split(',')[0].trim() });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: true, timestamp: Date.now() }));
+      } catch(e) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: false }));
+      }
+    });
+    return;
+  }
+
+  // 4. Admin Login: POST /api/login
   if (pathname === '/api/login' && method === 'POST') {
     let body = '';
     req.on('data', c => body += c);
     req.on('end', () => {
       try {
         const { username, password } = JSON.parse(body);
-        const userMatches = (username === ADMIN_USER);
-        const passMatches = (password === ADMIN_PASSWORD);
-
-        if (userMatches && passMatches) {
-          const token = generateToken(ADMIN_USER);
+        if (username === ADMIN_USER && password === ADMIN_PASSWORD) {
+          const token = generateToken(username);
           res.writeHead(200, { 'Content-Type': 'application/json' });
           return res.end(JSON.stringify({
             success: true,
             token,
-            user: ADMIN_USER
+            user: { username: ADMIN_USER, role: 'super_admin' },
+            message: 'تم تسجيل الدخول بنجاح'
           }));
-        } else {
-          res.writeHead(401, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ success: false, error: 'اسم المستخدم أو رمز المرور غير صحيح' }));
         }
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة' }));
       } catch(e) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: e.message }));
+        return res.end(JSON.stringify({ error: 'طلب غير صالح' }));
       }
     });
     return;
   }
 
-  // -------------------------------------------------------------
-  // PROTECTED ADMIN ENDPOINTS (Require Bearer Token)
-  // -------------------------------------------------------------
-
-  const rawAuth = req.headers['authorization'] || '';
-  const token = rawAuth.replace(/^Bearer\s+/i, '').trim();
-
-  if (!verifyToken(token)) {
-    res.writeHead(401, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ error: 'غير مصرح - يرجى تسجيل الدخول برمز الإدارة الصحيح' }));
+  // ===========================================================
+  // PROTECTED ADMIN ENDPOINTS
+  // ===========================================================
+  const authHeader = req.headers['authorization'];
+  let authToken = '';
+  if (authHeader) {
+    authToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
   }
 
-  // Admin Stats: GET /api/admin/stats
+  if (!verifyToken(authToken)) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ error: 'غير مصرح - الرجاء تسجيل الدخول أولاً' }));
+  }
+
+  // Admin Dashboard Statistics: GET /api/admin/stats
   if (pathname === '/api/admin/stats' && method === 'GET') {
     const catalog = await storage.loadCatalog();
     const requests = await storage.loadRequests();
+    const incoming = await storage.loadIncomingScrapes();
     const analytics = storage.getLiveAnalyticsSummary();
 
     const totalWorks = catalog.length;
@@ -246,6 +223,7 @@ const server = http.createServer(async (req, res) => {
         totalSeries,
         pendingRequests: pendingReqs,
         totalRequests: requests.length,
+        incomingDesktopScrapes: incoming.length,
         activeNow: analytics.activeNow,
         activeToday: analytics.activeToday,
         totalDevices: analytics.totalDevices,
@@ -328,7 +306,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // Admin Crawl & Publish: POST /api/admin/crawl-publish
+  // Admin Crawl & Publish Directly: POST /api/admin/crawl-publish
   if ((pathname === '/api/crawl-publish' || pathname === '/api/admin/crawl-publish') && method === 'POST') {
     let body = '';
     req.on('data', c => body += c);
@@ -356,7 +334,11 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Admin Desktop Direct Sync: POST /api/admin/desktop-sync
+  // ===========================================================
+  // DESKTOP APP INBOX SYNC & PUBLISHING WORKFLOW
+  // ===========================================================
+
+  // 1. Receive Scraped Works from MovieBox Desktop: POST /api/admin/desktop-sync
   if (pathname === '/api/admin/desktop-sync' && method === 'POST') {
     let body = '';
     req.on('data', c => body += c);
@@ -364,20 +346,41 @@ const server = http.createServer(async (req, res) => {
       try {
         const data = JSON.parse(body);
         const works = Array.isArray(data) ? data : [data];
-        let catalog = await storage.loadCatalog();
+        let incoming = await storage.loadIncomingScrapes();
 
         for (const w of works) {
-          const verified = await verifyAndEnhanceSubject(w);
-          catalog = catalog.filter(c => c.id !== verified.id && c.subjectId !== verified.subjectId);
-          catalog.unshift(verified);
+          const itemKey = w.subjectId || w.id || w.title;
+          const cleanItem = {
+            id: itemKey ? String(itemKey) : Date.now().toString(),
+            subjectId: w.subjectId || w.id || '',
+            title: w.title || 'عمل جديد',
+            titleAr: w.titleAr || w.title || 'عمل جديد',
+            cover: w.cover || 'assets/images/logo.png',
+            backdrop: w.backdrop || w.cover || 'assets/images/logo.png',
+            videoUrl: w.videoUrl || '',
+            resolution: w.resolution || '1080p',
+            imdbRating: w.imdbRating || w.rating || '7.5',
+            genre: w.genre || 'أكشن',
+            type: w.type || 'movie',
+            releaseDate: w.releaseDate || w.year || '2026',
+            subtitles: w.subtitles || [],
+            source: 'MovieBox Desktop App',
+            status: 'pending_review',
+            scrapedAt: new Date().toISOString()
+          };
+
+          // Deduplicate in incoming queue
+          incoming = incoming.filter(i => i.id !== cleanItem.id && i.title !== cleanItem.title);
+          incoming.unshift(cleanItem);
         }
 
-        await storage.persistCatalog(catalog);
+        await storage.persistIncomingScrapes(incoming);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({
           success: true,
           count: works.length,
-          message: `تم استيراد ${works.length} عمل من MovieBox Desktop بدقة 1080p وحفظها بنجاح!`
+          incomingTotal: incoming.length,
+          message: `تم استلام ${works.length} عمل من MovieBox الحاسبة وحفظها في الوارد للمراجعة والنشر!`
         }));
       } catch(e) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -385,6 +388,108 @@ const server = http.createServer(async (req, res) => {
       }
     });
     return;
+  }
+
+  // 2. Fetch Incoming Scrapes: GET /api/admin/desktop-scrapes
+  if (pathname === '/api/admin/desktop-scrapes' && method === 'GET') {
+    const incoming = await storage.loadIncomingScrapes();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ success: true, count: incoming.length, scrapes: incoming }));
+  }
+
+  // 3. Publish Single Incoming Work to Cinema Fox: POST /api/admin/desktop-scrapes/publish
+  if (pathname === '/api/admin/desktop-scrapes/publish' && method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', async () => {
+      try {
+        const { id } = JSON.parse(body);
+        let incoming = await storage.loadIncomingScrapes();
+        const target = incoming.find(s => s.id === id || s.subjectId === id);
+        if (!target) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'العمل غير موجود في قائمة الوارد' }));
+        }
+
+        // Verify & enhance (tests 1080p stream, covers, ensures production quality)
+        const verified = await verifyAndEnhanceSubject(target);
+
+        // Add to main catalog
+        let catalog = await storage.loadCatalog();
+        catalog = catalog.filter(c => c.id !== verified.id && c.title !== verified.title);
+        catalog.unshift(verified);
+        await storage.persistCatalog(catalog);
+
+        // Remove from incoming queue
+        incoming = incoming.filter(s => s.id !== id && s.subjectId !== id);
+        await storage.persistIncomingScrapes(incoming);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({
+          success: true,
+          published: verified,
+          remainingIncoming: incoming.length,
+          message: `تم نشر "${verified.title}" في تطبيق سينما فوكس بنجاح وهو متاح للمشاهدين الآن!`
+        }));
+      } catch(e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // 4. Publish ALL Incoming Works in Bulk: POST /api/admin/desktop-scrapes/publish-all
+  if (pathname === '/api/admin/desktop-scrapes/publish-all' && method === 'POST') {
+    let incoming = await storage.loadIncomingScrapes();
+    if (incoming.length === 0) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ success: true, count: 0, message: 'لا توجد أعمال واردة جديدة للنشر' }));
+    }
+
+    let catalog = await storage.loadCatalog();
+    let publishedCount = 0;
+
+    for (const item of incoming) {
+      const verified = await verifyAndEnhanceSubject(item);
+      catalog = catalog.filter(c => c.id !== verified.id && c.title !== verified.title);
+      catalog.unshift(verified);
+      publishedCount++;
+    }
+
+    await storage.persistCatalog(catalog);
+    await storage.persistIncomingScrapes([]); // Clear queue
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({
+      success: true,
+      count: publishedCount,
+      message: `تم نشر جميع الأعمال الواردة (${publishedCount} عمل) في تطبيق سينما فوكس بنجاح!`
+    }));
+  }
+
+  // 5. Delete an Incoming Work from Queue: DELETE /api/admin/desktop-scrapes/:id
+  if (pathname.startsWith('/api/admin/desktop-scrapes/') && method === 'DELETE') {
+    const id = pathname.replace('/api/admin/desktop-scrapes/', '');
+    let incoming = await storage.loadIncomingScrapes();
+    const initialLen = incoming.length;
+    incoming = incoming.filter(s => s.id !== id && s.subjectId !== id);
+    await storage.persistIncomingScrapes(incoming);
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({
+      success: true,
+      deleted: incoming.length < initialLen,
+      remaining: incoming.length,
+      message: 'تم إزالة العمل من قائمة الوارد'
+    }));
+  }
+
+  // 6. Clear All Incoming Scrapes: POST /api/admin/desktop-scrapes/clear
+  if (pathname === '/api/admin/desktop-scrapes/clear' && method === 'POST') {
+    await storage.persistIncomingScrapes([]);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ success: true, message: 'تم إفراغ قائمة الأعمال الواردة بالكامل' }));
   }
 
   // Admin Viewer Requests: GET /api/admin/requests
