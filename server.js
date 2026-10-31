@@ -98,8 +98,12 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/catalog' && method === 'GET') {
     const catalog = await storage.loadCatalog();
     const visible = catalog.filter(c => !c.hidden);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(visible));
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({
+      success: true,
+      count: visible.length,
+      catalog: visible
+    }));
   }
 
   // 2. Viewer Request Submission: POST /api/requests
