@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة تحكم سينما فوكس الإدارية السحابية | Cinema Fox Pro Dashboard</title>
+  <title>لوحة إدارة سينما فوكس الاحترافية السحابية | Cinema Fox Pro Cloud</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -38,33 +38,33 @@
 <body class="min-h-screen flex flex-col bg-foxDark">
 
   <!-- ========================================================= -->
-  <!-- 1. HIGH-SECURITY LOGIN OVERLAY (Username & Hardened Pass)  -->
+  <!-- 1. SECURE LOGIN OVERLAY (No Secrets Disclosed On Screen)   -->
   <!-- ========================================================= -->
-  <div id="loginOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-    <div class="bg-foxSurface border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
-      <!-- Glow effect -->
-      <div class="absolute -top-10 -right-10 w-36 h-36 bg-foxRed/20 rounded-full blur-3xl pointer-events-none"></div>
+  <div id="loginOverlay" class="fixed inset-0 bg-black/95 backdrop-blur-lg flex items-center justify-center z-50 p-4">
+    <div class="bg-foxSurface border border-foxBorder rounded-2xl p-8 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
+      <!-- Ambient Glow -->
+      <div class="absolute -top-12 -right-12 w-40 h-40 bg-foxRed/20 rounded-full blur-3xl pointer-events-none"></div>
 
       <div class="w-16 h-16 bg-foxRed rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-foxRed/30">
         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
       </div>
 
-      <h2 class="text-2xl font-black mb-1 tracking-tight">سينما فوكس الإدارية</h2>
-      <p class="text-gray-400 text-xs mb-6">نظام الدخول الآمن المشفر (256-Bit Bearer Protection)</p>
+      <h2 class="text-2xl font-black mb-1">لوحة إدارة سينما فوكس Pro</h2>
+      <p class="text-gray-400 text-xs mb-6">تسجيل الدخول الإداري المحمي (Session Stay-Active 24/7)</p>
 
       <form onsubmit="handleLogin(event)" class="space-y-4 text-right">
         <div>
           <label class="block text-xs font-bold text-gray-300 mb-1">اسم المستخدم</label>
-          <input type="text" id="adminUserInput" value="fox_admin" placeholder="اسم المستخدم (fox_admin)" required 
-            class="w-full bg-foxCard border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-foxRed text-sm">
+          <input type="text" id="adminUserInput" placeholder="أدخل اسم المستخدم" required autocomplete="username"
+            class="w-full bg-foxCard border border-foxBorder rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-foxRed text-sm">
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-300 mb-1">رمز المرور السري (Password)</label>
+          <label class="block text-xs font-bold text-gray-300 mb-1">رمز المرور السري</label>
           <div class="relative">
-            <input type="password" id="adminPasswordInput" value="Fox@2026#Secured!MasterKey" placeholder="أدخل كلمة المرور" required 
-              class="w-full bg-foxCard border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-foxRed text-sm pl-10">
-            <button type="button" onclick="togglePassVisibility()" class="absolute left-3 top-3.5 text-gray-400 hover:text-white">
+            <input type="password" id="adminPasswordInput" placeholder="أدخل رمز المرور" required autocomplete="current-password"
+              class="w-full bg-foxCard border border-foxBorder rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-foxRed text-sm pl-10">
+            <button type="button" onclick="togglePassVisibility()" class="absolute left-3 top-3.5 text-gray-400 hover:text-white" title="إظهار/إخفاء">
               👁️
             </button>
           </div>
@@ -79,10 +79,6 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
         </button>
       </form>
-
-      <div class="mt-6 pt-4 border-t border-white/5 text-[11px] text-gray-400">
-        البيانات الافتراضية: <span class="text-white font-mono">fox_admin</span> / <span class="text-white font-mono">Fox@2026#Secured!MasterKey</span>
-      </div>
     </div>
   </div>
 
@@ -98,42 +94,41 @@
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-extrabold text-lg leading-tight">سينما فوكس Pro</h1>
-            <span class="bg-foxRed/20 text-foxRed text-[10px] font-bold px-2 py-0.5 rounded-full border border-foxRed/30">V2.0 Cloud</span>
+            <h1 class="font-extrabold text-lg leading-tight">سينما فوكس الإدارية</h1>
+            <span class="bg-foxRed/20 text-foxRed text-[10px] font-bold px-2 py-0.5 rounded-full border border-foxRed/30">Cloud Persistent</span>
           </div>
           <p class="text-xs text-foxSuccess flex items-center gap-1.5 mt-0.5">
             <span class="w-2 h-2 rounded-full bg-foxSuccess animate-pulse"></span>
-            <span>متصل سحابياً بـ Vercel & MovieBox HD</span>
+            <span>متصل سحابياً ومحمي بـ GitHub Persistence</span>
           </p>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="flex items-center gap-2 bg-foxCard p-1 rounded-xl border border-foxBorder">
-        <button onclick="switchTab('stats')" id="tabBtn-stats" class="px-4 py-2 rounded-lg text-xs font-bold bg-foxRed text-white transition flex items-center gap-1.5">
-          📊 المؤشرات
+      <nav class="flex items-center gap-1.5 bg-foxCard p-1 rounded-xl border border-foxBorder">
+        <button onclick="switchTab('analytics')" id="tabBtn-analytics" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-foxRed text-white transition flex items-center gap-1.5">
+          👥 المتصلون والتطبيق (<span id="navActiveUsers">1</span>)
         </button>
-        <button onclick="switchTab('crawler')" id="tabBtn-crawler" class="px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
-          🔍 زاحف MovieBox
-        </button>
-        <button onclick="switchTab('catalog')" id="tabBtn-catalog" class="px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
+        <button onclick="switchTab('catalog')" id="tabBtn-catalog" class="px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
           🎬 الأعمال المنشورة (<span id="navCatalogCount">0</span>)
         </button>
-        <button onclick="switchTab('requests')" id="tabBtn-requests" class="px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition relative flex items-center gap-1.5">
+        <button onclick="switchTab('crawler')" id="tabBtn-crawler" class="px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
+          🔍 زاحف MovieBox
+        </button>
+        <button onclick="switchTab('requests')" id="tabBtn-requests" class="px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition relative flex items-center gap-1.5">
           📥 طلبات المشاهدين
-          <span id="requestsBadge" class="bg-foxRed text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+          <span id="requestsBadge" class="bg-foxRed text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
         </button>
       </nav>
 
       <!-- User Profile & Logout -->
       <div class="flex items-center gap-3">
         <div class="text-left hidden sm:block">
-          <div class="text-xs font-bold text-white" id="loggedUsername">fox_admin</div>
-          <div class="text-[10px] text-gray-400">مسؤول النظام</div>
+          <div class="text-xs font-bold text-white">مسؤول النظام</div>
+          <div class="text-[10px] text-green-400 font-mono">جلسة دائمة (Active)</div>
         </div>
         <button onclick="logout()" class="text-gray-400 hover:text-white text-xs bg-foxCard hover:bg-white/10 px-3 py-2 rounded-lg border border-foxBorder transition flex items-center gap-1">
           <span>خروج</span>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
         </button>
       </div>
     </header>
@@ -142,131 +137,95 @@
     <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
 
       <!-- ========================================== -->
-      <!-- TAB 1: SYSTEM STATS (المؤشرات والإحصائيات)   -->
+      <!-- TAB 1: USERS & APP ANALYTICS (المتصلون)     -->
       <!-- ========================================== -->
-      <div id="tabContent-stats" class="space-y-6">
+      <div id="tabContent-analytics" class="space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Card 1 -->
+          <!-- Active Now -->
           <div class="bg-foxSurface border border-foxBorder p-5 rounded-2xl relative overflow-hidden shadow-lg">
-            <div class="text-gray-400 text-xs font-bold mb-1">إجمالي الأعمال المنشورة</div>
-            <div class="text-3xl font-black text-white" id="statTotalWorks">0</div>
-            <div class="text-xs text-green-400 mt-2 flex items-center gap-1">
-              <span>● تعمل مباشرة في التطبيق</span>
+            <div class="text-gray-400 text-xs font-bold mb-1">المستخدمون النشطون الآن</div>
+            <div class="text-4xl font-black text-foxSuccess flex items-center gap-2">
+              <span id="statActiveNow">1</span>
+              <span class="w-3 h-3 rounded-full bg-foxSuccess animate-ping"></span>
             </div>
-            <div class="absolute -left-4 -bottom-4 text-white/5 text-6xl font-black">🎬</div>
+            <div class="text-xs text-gray-400 mt-2">خلال آخر 15 دقيقة</div>
+            <div class="absolute -left-4 -bottom-4 text-white/5 text-6xl font-black">🟢</div>
           </div>
 
-          <!-- Card 2 -->
+          <!-- Total Devices -->
           <div class="bg-foxSurface border border-foxBorder p-5 rounded-2xl relative overflow-hidden shadow-lg">
-            <div class="text-gray-400 text-xs font-bold mb-1">الأفلام والسينما 4K</div>
-            <div class="text-3xl font-black text-foxImdb" id="statTotalMovies">0</div>
-            <div class="text-xs text-gray-400 mt-2">تشمل روابط بدقة 1080p FHD</div>
-            <div class="absolute -left-4 -bottom-4 text-white/5 text-6xl font-black">🍿</div>
+            <div class="text-gray-400 text-xs font-bold mb-1">إجمالي الأجهزة المثبتة</div>
+            <div class="text-4xl font-black text-blue-400" id="statTotalDevices">1</div>
+            <div class="text-xs text-gray-400 mt-2">أجهزة Android الفريدة</div>
+            <div class="absolute -left-4 -bottom-4 text-white/5 text-6xl font-black">📱</div>
           </div>
 
-          <!-- Card 3 -->
+          <!-- Total Sessions -->
           <div class="bg-foxSurface border border-foxBorder p-5 rounded-2xl relative overflow-hidden shadow-lg">
-            <div class="text-gray-400 text-xs font-bold mb-1">المسلسلات والمواسم</div>
-            <div class="text-3xl font-black text-blue-400" id="statTotalSeries">0</div>
-            <div class="text-xs text-gray-400 mt-2">مع الحلقات والترجمة العربية</div>
-            <div class="absolute -left-4 -bottom-4 text-white/5 text-6xl font-black">📺</div>
+            <div class="text-gray-400 text-xs font-bold mb-1">إجمالي فتح التطبيق (Sessions)</div>
+            <div class="text-4xl font-black text-foxImdb" id="statTotalSessions">0</div>
+            <div class="text-xs text-gray-400 mt-2">جلسات استخدام التطبيق</div>
+            <div class="absolute -left-4 -bottom-4 text-white/5 text-6xl font-black">🔄</div>
           </div>
 
-          <!-- Card 4 -->
+          <!-- Pending Requests -->
           <div class="bg-foxSurface border border-foxBorder p-5 rounded-2xl relative overflow-hidden shadow-lg">
-            <div class="text-gray-400 text-xs font-bold mb-1">طلبات المشاهدين المعلقة</div>
-            <div class="text-3xl font-black text-foxRed" id="statPendingReqs">0</div>
-            <div class="text-xs text-yellow-400 mt-2">واردة من زر "طلب عمل" بالتطبيق</div>
+            <div class="text-gray-400 text-xs font-bold mb-1">طلبات المشاهدين الواردة</div>
+            <div class="text-4xl font-black text-foxRed" id="statPendingReqs">0</div>
+            <div class="text-xs text-yellow-400 mt-2">تنتظر الزحف والتوفير</div>
             <div class="absolute -left-4 -bottom-4 text-white/5 text-6xl font-black">📥</div>
           </div>
         </div>
 
-        <!-- System Status & Quick Actions -->
+        <!-- Recent Devices Table -->
         <div class="bg-foxSurface border border-foxBorder rounded-2xl p-6 shadow-xl space-y-4">
           <div class="flex items-center justify-between border-b border-foxBorder pb-4">
             <div>
-              <h3 class="text-base font-bold text-white">حالة الاتصال والربط السحابي</h3>
-              <p class="text-xs text-gray-400">التطبيق متصل بـ Vercel مع دعم التحديث الفوري المباشر (Pull-to-Refresh)</p>
+              <h3 class="text-base font-bold text-white">الأجهزة المتصلة حديثاً بتطبيق سينما فوكس</h3>
+              <p class="text-xs text-gray-400">تحديث فوري عند فتح التطبيق من أي هاتف</p>
             </div>
-            <button onclick="fetchStats(); fetchCatalog();" class="bg-foxCard hover:bg-white/10 text-white text-xs px-4 py-2 rounded-xl border border-foxBorder transition flex items-center gap-1.5">
-              <span>تحديث البيانات الآن</span>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <button onclick="fetchAnalytics()" class="bg-foxCard hover:bg-white/10 text-white text-xs px-3 py-1.5 rounded-xl border border-foxBorder transition">
+              تحديث مباشر
             </button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div class="bg-foxCard p-4 rounded-xl border border-foxBorder">
-              <span class="text-gray-400 block mb-1">رابط واجهة الـ API العامة:</span>
-              <span class="text-foxSuccess font-mono font-bold select-all">https://cinema-fox-admin.vercel.app/api/catalog</span>
-            </div>
-            <div class="bg-foxCard p-4 rounded-xl border border-foxBorder">
-              <span class="text-gray-400 block mb-1">مستقبل طلبات المشاهدين:</span>
-              <span class="text-blue-400 font-mono font-bold select-all">POST /api/requests</span>
-            </div>
-            <div class="bg-foxCard p-4 rounded-xl border border-foxBorder">
-              <span class="text-gray-400 block mb-1">خوارزمية الفحص:</span>
-              <span class="text-white font-bold">HTTP HEAD Verification + Auto HD Elevation</span>
-            </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-foxCard text-gray-400 border-b border-foxBorder">
+                <tr>
+                  <th class="p-3">معرّف الجهاز (Device ID)</th>
+                  <th class="p-3">نوع الهاتف / النظام</th>
+                  <th class="p-3">إصدار التطبيق</th>
+                  <th class="p-3">عدد الجلسات</th>
+                  <th class="p-3">آخر ظهور</th>
+                  <th class="p-3">الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="devicesTableBody" class="divide-y divide-foxBorder text-gray-200">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       <!-- ========================================== -->
-      <!-- TAB 2: SMART MOVIEBOX CRAWLER (محرك الزحف) -->
-      <!-- ========================================== -->
-      <div id="tabContent-crawler" class="space-y-6 hidden">
-        <!-- Search & Control Card -->
-        <div class="bg-foxSurface border border-foxBorder rounded-2xl p-6 shadow-xl space-y-4">
-          <div>
-            <h2 class="text-lg font-bold text-white flex items-center gap-2">
-              <span>⚡ الزحف التلقائي من مكتبة MovieBox</span>
-              <span class="text-xs font-normal text-gray-400">(أكثر من 400 عمل سينمائي وتلفزيوني بدقة HD)</span>
-            </h2>
-            <p class="text-xs text-gray-400">ابحث عن أي فيلم أو مسلسل، وسيقوم المحرك بفحص روابط البث وترقيتها إلى HD 1080p وإضافتها لتطبيقك فوراً.</p>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3">
-            <div class="flex-1 relative">
-              <input type="text" id="crawlerSearchInput" onkeyup="if(event.key === 'Enter') executeCrawlerSearch()" 
-                placeholder="ابحث بالاسم بالإنجليزية أو العربية (مثل: Dexter, Lupin, Batman, حبك نار)..." 
-                class="w-full bg-foxCard border border-foxBorder rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-foxRed text-sm pr-10">
-              <span class="absolute right-3.5 top-3.5 text-gray-400">🔍</span>
-            </div>
-            <button onclick="executeCrawlerSearch()" class="bg-foxRed hover:bg-foxRedHover text-white font-bold px-6 py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-foxRed/25">
-              <span>بحث في MovieBox</span>
-            </button>
-            <button onclick="crawlAllBatch()" class="bg-foxCard hover:bg-white/10 text-white font-bold px-5 py-3 rounded-xl border border-foxBorder transition text-sm flex items-center justify-center gap-2">
-              <span>🚀 زحف شامل (Batch Crawl)</span>
-            </button>
-          </div>
-
-          <!-- Notification Banner -->
-          <div id="crawlerAlert" class="hidden p-4 rounded-xl text-xs flex items-center justify-between"></div>
-        </div>
-
-        <!-- Crawler Results Grid -->
-        <div id="crawlerResultsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <!-- Dynamically populated -->
-        </div>
-      </div>
-
-      <!-- ========================================== -->
-      <!-- TAB 3: PUBLISHED CATALOG (الأعمال المنشورة) -->
+      <!-- TAB 2: PUBLISHED CATALOG (الأعمال المنشورة) -->
       <!-- ========================================== -->
       <div id="tabContent-catalog" class="space-y-6 hidden">
         <div class="bg-foxSurface border border-foxBorder rounded-2xl p-6 shadow-xl space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-foxBorder pb-4">
             <div>
               <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                <span>🎬 الأعمال المعروضة في التطبيق حالياً</span>
-                <span class="text-xs bg-foxCard text-gray-300 px-2 py-0.5 rounded-full border border-foxBorder" id="catalogBadgeCount">0 عمل</span>
+                <span>🎬 الأعمال المنشورة في سينما فوكس</span>
+                <span class="text-xs bg-foxCard text-gray-300 px-2.5 py-0.5 rounded-full border border-foxBorder" id="catalogBadgeCount">0 عمل</span>
               </h2>
-              <p class="text-xs text-gray-400">يمكنك هنا إخفاء أو إظهار أو حذف أي فيلم أو فحص روابط البث المباشرة.</p>
+              <p class="text-xs text-gray-400">محفوظة سحابياً بشكل دائم وتظهر بالتطبيق فوراً بالسحب للأسفل (Pull-to-Refresh).</p>
             </div>
 
             <div class="flex items-center gap-3">
-              <input type="text" id="catalogFilterInput" oninput="filterCatalogTable()" placeholder="تصفية بالقائمة..." 
-                class="bg-foxCard border border-foxBorder rounded-xl px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-foxRed">
+              <input type="text" id="catalogFilterInput" oninput="filterCatalogTable()" placeholder="بحث في الأعمال المنشورة..." 
+                class="bg-foxCard border border-foxBorder rounded-xl px-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-foxRed w-64">
             </div>
           </div>
 
@@ -279,8 +238,8 @@
                   <th class="p-3">العنوان</th>
                   <th class="p-3">النوع</th>
                   <th class="p-3">التقييم</th>
-                  <th class="p-3">جودة البث</th>
-                  <th class="p-3">الحالة في التطبيق</th>
+                  <th class="p-3">جودة الرابط</th>
+                  <th class="p-3">الظهور بالتطبيق</th>
                   <th class="p-3 text-center">الإجراءات</th>
                 </tr>
               </thead>
@@ -293,6 +252,42 @@
       </div>
 
       <!-- ========================================== -->
+      <!-- TAB 3: SMART MOVIEBOX CRAWLER (محرك الزحف) -->
+      <!-- ========================================== -->
+      <div id="tabContent-crawler" class="space-y-6 hidden">
+        <div class="bg-foxSurface border border-foxBorder rounded-2xl p-6 shadow-xl space-y-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>⚡ زاحف موفي بوكس فائق الدقة (1080p Crawler)</span>
+            </h2>
+            <p class="text-xs text-gray-400">ابحث عن أي فيلم أو مسلسل من مكتبة موفي بوكس، واضغط "زحف ونشر" لفحص الرابط وترقيته إلى HD ونشره في التطبيق فوراً.</p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+              <input type="text" id="crawlerSearchInput" onkeyup="if(event.key === 'Enter') executeCrawlerSearch()" 
+                placeholder="ابحث بالاسم (مثال: Dexter, Batman, Lupin, Fast, حبك نار)..." 
+                class="w-full bg-foxCard border border-foxBorder rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-foxRed text-sm pr-10">
+              <span class="absolute right-3.5 top-3.5 text-gray-400">🔍</span>
+            </div>
+            <button onclick="executeCrawlerSearch()" class="bg-foxRed hover:bg-foxRedHover text-white font-bold px-6 py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-foxRed/25">
+              <span>بحث سريع</span>
+            </button>
+            <button onclick="crawlAllBatch()" class="bg-foxCard hover:bg-white/10 text-white font-bold px-5 py-3 rounded-xl border border-foxBorder transition text-sm flex items-center justify-center gap-2">
+              <span>🚀 زحف مجمّع (20 عمل)</span>
+            </button>
+          </div>
+
+          <div id="crawlerAlert" class="hidden p-4 rounded-xl text-xs flex items-center justify-between"></div>
+        </div>
+
+        <!-- Crawler Results Grid -->
+        <div id="crawlerResultsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- ========================================== -->
       <!-- TAB 4: VIEWER REQUESTS (طلبات المشاهدين)     -->
       <!-- ========================================== -->
       <div id="tabContent-requests" class="space-y-6 hidden">
@@ -300,9 +295,9 @@
           <div class="flex items-center justify-between border-b border-foxBorder pb-4">
             <div>
               <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                <span>📥 طلبات الأفلام والمسلسلات الواردة من التطبيق</span>
+                <span>📥 طلبات الأفلام والمسلسلات الواردة من تطبيق الموبايل</span>
               </h2>
-              <p class="text-xs text-gray-400">يتم إرسال هذه الطلبات مباشرة من المشاهدين عبر زر "طلب عمل" في تطبيق سينما فوكس.</p>
+              <p class="text-xs text-gray-400">كل طلب يتم إرساله من زر "طلب عمل" في التطبيق يُحفظ سحابياً ويظهر هنا مع زر زحف فوري.</p>
             </div>
             <button onclick="fetchRequests()" class="bg-foxCard hover:bg-white/10 text-white text-xs px-3 py-2 rounded-xl border border-foxBorder transition">
               تحديث الطلبات
@@ -318,14 +313,13 @@
     </main>
   </div>
 
-  <!-- JAVASCRIPT LOGIC & SECURE API CLIENT -->
+  <!-- JAVASCRIPT CLIENT & PERSISTENT LOGIC -->
   <script>
     const API_BASE = window.location.origin;
-    let authToken = localStorage.getItem('fox_admin_token') || '';
+    let authToken = localStorage.getItem('fox_admin_jwt') || '';
     let currentCatalog = [];
     let currentRequests = [];
 
-    // Check authentication on initial page load
     window.addEventListener('DOMContentLoaded', () => {
       if (authToken) {
         showDashboard();
@@ -360,15 +354,14 @@
         const data = await res.json();
         if (data.success && data.token) {
           authToken = data.token;
-          localStorage.setItem('fox_admin_token', authToken);
-          localStorage.setItem('fox_admin_user', data.user || user);
+          localStorage.setItem('fox_admin_jwt', authToken);
           showDashboard();
         } else {
           err.innerText = data.error || 'رمز المرور غير صحيح';
           err.classList.remove('hidden');
         }
       } catch (errExp) {
-        err.innerText = 'فشل الاتصال بالخادم: ' + errExp.message;
+        err.innerText = 'فشل الاتصال: ' + errExp.message;
         err.classList.remove('hidden');
       } finally {
         btn.disabled = false;
@@ -379,63 +372,91 @@
     function showDashboard() {
       document.getElementById('loginOverlay').classList.add('hidden');
       document.getElementById('mainDashboard').classList.remove('hidden');
-      document.getElementById('loggedUsername').innerText = localStorage.getItem('fox_admin_user') || 'fox_admin';
-      fetchStats();
+      fetchAnalytics();
       fetchCatalog();
       fetchRequests();
       executeCrawlerSearch('');
     }
 
     function logout() {
-      localStorage.removeItem('fox_admin_token');
-      localStorage.removeItem('fox_admin_user');
+      localStorage.removeItem('fox_admin_jwt');
+      authToken = '';
       window.location.reload();
     }
 
     function switchTab(tabId) {
-      ['stats', 'crawler', 'catalog', 'requests'].forEach(t => {
+      ['analytics', 'catalog', 'crawler', 'requests'].forEach(t => {
         const content = document.getElementById(`tabContent-${t}`);
         const btn = document.getElementById(`tabBtn-${t}`);
         if (t === tabId) {
           content.classList.remove('hidden');
-          btn.className = 'px-4 py-2 rounded-lg text-xs font-bold bg-foxRed text-white transition flex items-center gap-1.5';
+          btn.className = 'px-3.5 py-2 rounded-lg text-xs font-bold bg-foxRed text-white transition flex items-center gap-1.5';
         } else {
           content.classList.add('hidden');
-          btn.className = 'px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5';
+          btn.className = 'px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5';
         }
       });
     }
 
-    // Helper: Authenticated fetch
     async function authFetch(url, options = {}) {
       options.headers = options.headers || {};
       options.headers['Authorization'] = `Bearer ${authToken}`;
       const res = await fetch(url, options);
       if (res.status === 401) {
         logout();
-        throw new Error('انتهت صلاحية الجلسة، يرجى تسجيل الدخول مجدداً');
+        throw new Error('انتهت صلاحية الجلسة');
       }
       return res;
     }
 
-    // API: Fetch Stats
-    async function fetchStats() {
+    // 1. ANALYTICS & ACTIVE USERS
+    async function fetchAnalytics() {
       try {
-        const res = await authFetch(`${API_BASE}/api/admin/stats`);
+        const res = await authFetch(`${API_BASE}/api/admin/analytics`);
         const data = await res.json();
-        if (data.success && data.stats) {
-          document.getElementById('statTotalWorks').innerText = data.stats.totalWorks;
-          document.getElementById('statTotalMovies').innerText = data.stats.totalMovies;
-          document.getElementById('statTotalSeries').innerText = data.stats.totalSeries;
-          document.getElementById('statPendingReqs').innerText = data.stats.pendingRequests;
-          document.getElementById('requestsBadge').innerText = data.stats.pendingRequests;
+        if (data.success && data.analytics) {
+          const a = data.analytics;
+          document.getElementById('statActiveNow').innerText = a.activeNow;
+          document.getElementById('navActiveUsers').innerText = a.activeNow;
+          document.getElementById('statTotalDevices').innerText = a.totalDevices;
+          document.getElementById('statTotalSessions').innerText = a.totalSessions;
+          renderDevicesTable(a.recentDevices || []);
         }
       } catch (e) {
-        console.error('Stats fetch error:', e);
+        console.error('Analytics error:', e);
       }
     }
 
-    // API: Fetch Catalog
+    function renderDevicesTable(devices) {
+      const tbody = document.getElementById('devicesTableBody');
+      if (!devices || devices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">جاري تسجيل الأجهزة النشطة من التطبيق...</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = devices.map(d => {
+        const minsAgo = Math.floor((Date.now() - d.lastActive) / 60000);
+        const timeText = minsAgo <= 1 ? 'الآن' : `منذ ${minsAgo} دقيقة`;
+        const isOnline = minsAgo <= 15;
+
+        return `
+          <tr class="hover:bg-white/[0.02] transition">
+            <td class="p-3 font-mono text-[11px] text-gray-300">${d.deviceId.substring(0, 16)}...</td>
+            <td class="p-3 font-bold text-white">${d.model || 'Android Phone'}</td>
+            <td class="p-3 text-gray-400">v${d.appVersion || '1.0.0'}</td>
+            <td class="p-3 font-bold text-foxImdb">${d.sessionCount || 1} مرة</td>
+            <td class="p-3 text-gray-400">${timeText}</td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isOnline ? 'bg-green-900/40 text-green-300 border border-green-700/50' : 'bg-gray-800 text-gray-400'}">
+                ${isOnline ? '● متصل الآن' : 'غير متصل'}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 2. CATALOG
     async function fetchCatalog() {
       try {
         const res = await authFetch(`${API_BASE}/api/admin/catalog`);
@@ -447,7 +468,7 @@
           renderCatalogTable(currentCatalog);
         }
       } catch (e) {
-        console.error('Catalog fetch error:', e);
+        console.error('Catalog error:', e);
       }
     }
 
@@ -490,7 +511,7 @@
               <a href="${item.videoUrl}" target="_blank" class="p-1.5 bg-foxCard hover:bg-white/10 rounded-lg text-blue-400 hover:text-white transition" title="فحص رابط البث المباشر">
                 ▶
               </a>
-              <button onclick="deleteWork('${item.id || item.subjectId}', '${item.title}')" class="p-1.5 bg-red-900/20 hover:bg-red-900/40 rounded-lg text-red-400 hover:text-red-300 transition" title="حذف من التطبيق">
+              <button onclick="deleteWork('${item.id || item.subjectId}', '${item.title}')" class="p-1.5 bg-red-900/20 hover:bg-red-900/40 rounded-lg text-red-400 hover:text-red-300 transition" title="حذف نهائي">
                 🗑
               </button>
             </div>
@@ -516,33 +537,31 @@
           body: JSON.stringify({ id })
         });
         const d = await res.json();
-        if (d.success) {
-          fetchCatalog();
-        }
+        if (d.success) fetchCatalog();
       } catch (e) {
         alert('خطأ: ' + e.message);
       }
     }
 
     async function deleteWork(id, title) {
-      if (!confirm(`هل أنت متأكد من حذف "${title}" من التطبيق؟`)) return;
+      if (!confirm(`هل أنت متأكد من حذف "${title}" نهائياً من التطبيق؟`)) return;
       try {
         const res = await authFetch(`${API_BASE}/api/admin/catalog/${id}`, { method: 'DELETE' });
         const d = await res.json();
         if (d.success) {
           fetchCatalog();
-          fetchStats();
+          fetchAnalytics();
         }
       } catch (e) {
         alert('خطأ في الحذف: ' + e.message);
       }
     }
 
-    // API: MovieBox Search & Crawler
+    // 3. MOVIEBOX CRAWLER
     async function executeCrawlerSearch(query = null) {
       const q = query !== null ? query : document.getElementById('crawlerSearchInput').value.trim();
       const container = document.getElementById('crawlerResultsContainer');
-      container.innerHTML = '<div class="col-span-full py-12 text-center text-gray-400">جاري البحث في مكتبة MovieBox...</div>';
+      container.innerHTML = '<div class="col-span-full py-12 text-center text-gray-400">جاري فحص مكتبة MovieBox...</div>';
 
       try {
         const res = await authFetch(`${API_BASE}/api/admin/search-moviebox?q=${encodeURIComponent(q)}`);
@@ -560,7 +579,7 @@
     function renderCrawlerResults(items) {
       const container = document.getElementById('crawlerResultsContainer');
       if (!items || items.length === 0) {
-        container.innerHTML = '<div class="col-span-full py-12 text-center text-gray-500">لا توجد أعمال مطابقة في موفي بوكس</div>';
+        container.innerHTML = '<div class="col-span-full py-12 text-center text-gray-500">لا توجد نتائج في موفي بوكس</div>';
         return;
       }
 
@@ -584,7 +603,7 @@
 
             <button onclick="crawlSingleWork(${JSON.stringify(item).replace(/"/g, '&quot;')}, this)" 
               class="w-full bg-foxCard hover:bg-foxRed text-white font-bold py-2 rounded-xl text-xs border border-foxBorder hover:border-foxRed transition flex items-center justify-center gap-1.5">
-              <span>⚡ زحف ونشر</span>
+              <span>⚡ زحف ونشر HD</span>
             </button>
           </div>
         </div>
@@ -608,8 +627,8 @@
         if (data.success) {
           btnElement.innerHTML = '✓ تم النشر بالـ HD';
           btnElement.className = 'w-full bg-green-900/60 text-green-300 font-bold py-2 rounded-xl text-xs flex items-center justify-center';
-          fetchStats();
           fetchCatalog();
+          fetchAnalytics();
         } else {
           alert('خطأ: ' + (data.error || 'فشل الزحف'));
           btnElement.innerHTML = originalText;
@@ -623,10 +642,10 @@
     }
 
     async function crawlAllBatch() {
-      if (!confirm('هل تريد زحف وفحص ونشر أول 25 عمل من نتائج موفي بوكس تلقائياً بدقة HD؟')) return;
+      if (!confirm('هل تريد زحف وفحص ونشر أول 20 عمل تلقائياً بدقة HD؟')) return;
       const alertBox = document.getElementById('crawlerAlert');
       alertBox.className = 'p-4 rounded-xl text-xs bg-blue-900/40 border border-blue-700/50 text-blue-200 flex items-center justify-between';
-      alertBox.innerText = 'جاري الزحف المتزامن على الأعمال... يرجى الانتظار بضع ثوانٍ...';
+      alertBox.innerText = 'جاري الزحف وفحص روابط الـ HD سحابياً...';
       alertBox.classList.remove('hidden');
 
       try {
@@ -642,23 +661,25 @@
             });
           }
           alertBox.className = 'p-4 rounded-xl text-xs bg-green-900/40 border border-green-700/50 text-green-200 flex items-center justify-between';
-          alertBox.innerText = `✓ تم زحف وفحص وترقية ${toCrawl.length} عمل بنجاح وتوفيرها لتطبيق الموبايل!`;
-          fetchStats();
+          alertBox.innerText = `✓ تم فحص وترقية ونشر ${toCrawl.length} عمل بنجاح وتوفيرها للتطبيق!`;
           fetchCatalog();
+          fetchAnalytics();
         }
       } catch (e) {
         alertBox.className = 'p-4 rounded-xl text-xs bg-red-900/40 border border-red-700/50 text-red-200 flex items-center justify-between';
-        alertBox.innerText = 'خطأ أثناء الزحف الشامل: ' + e.message;
+        alertBox.innerText = 'خطأ: ' + e.message;
       }
     }
 
-    // API: Fetch Requests
+    // 4. VIEWER REQUESTS
     async function fetchRequests() {
       try {
         const res = await authFetch(`${API_BASE}/api/admin/requests`);
         const data = await res.json();
         if (data.success && data.requests) {
           currentRequests = data.requests;
+          document.getElementById('requestsBadge').innerText = currentRequests.filter(r => r.status === 'pending').length;
+          document.getElementById('statPendingReqs').innerText = currentRequests.filter(r => r.status === 'pending').length;
           renderRequests(currentRequests);
         }
       } catch (e) {
@@ -681,8 +702,8 @@
               <span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.type === 'مسلسل' ? 'bg-blue-900/40 text-blue-300' : 'bg-yellow-900/40 text-yellow-300'}">${r.type}</span>
               <span class="text-gray-500 text-xs">(${r.year || '2026'})</span>
             </div>
-            <p class="text-xs text-gray-300">${r.notes || 'لا توجد ملاحظات إضافية'}</p>
-            <div class="text-[10px] text-gray-500">تاريخ الطلب: ${r.date || 'مؤخراً'}</div>
+            <p class="text-xs text-gray-300">${r.notes || 'طلب من المشاهد'}</p>
+            <div class="text-[10px] text-gray-500">التاريخ: ${r.date || 'مؤخراً'}</div>
           </div>
 
           <div class="flex items-center gap-2">
@@ -707,7 +728,6 @@
         body: JSON.stringify({ id: reqId, status: 'completed' })
       });
       fetchRequests();
-      fetchStats();
     }
 
     async function resolveRequest(id, status) {
@@ -718,7 +738,6 @@
           body: JSON.stringify({ id, status })
         });
         fetchRequests();
-        fetchStats();
       } catch (e) {
         alert('خطأ: ' + e.message);
       }
