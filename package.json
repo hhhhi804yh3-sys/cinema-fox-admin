@@ -1,0 +1,13 @@
+{
+  "name": "cinema-fox-admin",
+  "version": "1.0.0",
+  "description": "لوحة تحكم سينما فوكس الذكية لزحف ونشر الأعمال من MovieBox إلى Supabase",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  }
+}
